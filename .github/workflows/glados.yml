@@ -2,8 +2,8 @@ name: GLaDOS Checkin
 
 on:
   schedule:
-    - cron: '30 0 * * *' # 每天北京时间早上 8:30 自动执行
-  workflow_dispatch: # 支持手动触发
+    - cron: '30 0 * * *'
+  workflow_dispatch:
 
 jobs:
   build:
@@ -11,9 +11,9 @@ jobs:
     steps:
       - name: Checkin
         run: |
-          curl 'https://glados.rocks/api/user/checkin' \
+          curl 'https://glados.one/api/user/checkin' \
           -H 'cookie: ${{ secrets.GLADOS_COOKIE }}' \
           -H 'content-type: application/json;charset=UTF-8' \
           -H 'user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' \
-          --data-raw '{"token":"glados.network"}' \
+          --data-raw '{"token":"glados.one"}' \
           --compressed
