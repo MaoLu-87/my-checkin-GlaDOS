@@ -1,13 +1,24 @@
+name: GLaDOS Checkin
+
+on:
+  schedule:
+    - cron: '19 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
       - name: Checkin
         run: |
           resp=$(curl -s 'https://glados.one/api/user/checkin' \
-            -H 'cookie: ${{ secrets.GLADOS_COOKIE }}' \
+            -H "cookie: ${{ secrets.GLADOS_COOKIE }}" \
             -H 'content-type: application/json;charset=UTF-8' \
             -H 'origin: https://glados.one' \
             -H 'user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' \
             --data-raw '{"token":"glados.one"}')
           echo "$resp" | head -c 300
           if echo "$resp" | grep -qE '"code":-2|device-mismatch'; then
-            echo '::error::签到失败：Cookie 失效或设备不匹配，请重新登录取 Cookie'
+            echo '::error::Cookie fail or device mismatch'
             exit 1
           fi
