@@ -8,17 +8,30 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Checkin
         run: |
-          resp=$(curl -s 'https://glados.one/api/user/checkin' \
+          resp=$(curl -s --max-time 30 --retry 3 --retry-delay 5 \
+            'https://glados.one/api/user/checkin' \
             -H "cookie: ${{ secrets.GLADOS_COOKIE }}" \
             -H 'content-type: application/json;charset=UTF-8' \
             -H 'origin: https://glados.one' \
             -H 'user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' \
             --data-raw '{"token":"glados.one"}')
+
           echo "$resp" | head -c 300
-          if echo "$resp" | grep -qE '"code":-2|device-mismatch'; then
-            echo '::error::Cookie fail or device mismatch'
-            exit 1
-          fi
+          echo
+
+          code=$(printf '%s' "$resp" | grep -oE '"code":-?[0-9]+' | head -1 | cut -d: -f2)
+          echo "code=$code"
+
+          case "$code" in
+            0|1)
+              echo "签到成功（code=$code）"
+              ;;
+            *)
+              echo "::error::签到失败 code=${code:-无} 响应=$resp"
+              exit 1
+              ;;
+          esac
